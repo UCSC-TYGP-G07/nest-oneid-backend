@@ -1,10 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { AppUser } from '../users/appUser.entity';
 
 /*
@@ -12,7 +6,7 @@ import { AppUser } from '../users/appUser.entity';
  * * This is an abstract which should be inherited
  */
 
-@Entity()
+@Entity('PID_Request')
 export abstract class Request {
   @PrimaryGeneratedColumn()
   request_id: number;
@@ -26,7 +20,7 @@ export abstract class Request {
   @Column({ nullable: false })
   req_status: string;
 
-  @OneToOne(() => AppUser)
-  @JoinColumn()
+  @OneToOne(() => AppUser, { cascade: true })
+  @JoinColumn({ name: 'user_id' })
   appUser: AppUser;
 }

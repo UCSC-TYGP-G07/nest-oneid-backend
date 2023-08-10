@@ -1,9 +1,16 @@
 import { Body, Controller, Get, Header, Post } from '@nestjs/common';
 import { NicRequestService } from './nicRequest.service';
+import { NicRequestPostDto } from './nicRequestPost.dto';
+import { RequestService } from '../request.service';
+import { AppUserService } from '../../users/appUser.service';
 
 @Controller('/request/nic')
 export class NicRequestController {
-  constructor(private readonly nicRequestService: NicRequestService) {}
+  constructor(
+    private readonly requestService: RequestService,
+    private readonly appUserService: AppUserService,
+    private readonly nicRequestService: NicRequestService,
+  ) {}
 
   /*
    * Url - domain-name/request/nic [GET]
@@ -12,9 +19,25 @@ export class NicRequestController {
    * Return type - list of current all the nic requests
    */
   @Get('/')
-  @Header('content-type', 'application/json')
-  getAllNicRequests(): string {
-    return 'Get request made!';
+  @Header('Content-Type', 'application/json')
+  async getAllNicRequests(): Promise<string | null> {
+    // Fetching the Nic Request
+    const allRequests = await this.nicRequestService.getAllNICRequests();
+
+    const result = await Promise.all(
+      allRequests.map(async (req) => {
+        // Getting the request entity
+        const request = await this.requestService.find(req.request_id);
+
+        // Getting the user who created this request
+        const appUser = await this.appUserService.find(request.appUser.user_id);
+
+        return { ...req, ...request, ...appUser };
+      }),
+    );
+
+    console.log(result);
+    return JSON.stringify(result);
   }
 
   /*
@@ -24,26 +47,23 @@ export class NicRequestController {
    * Return type - list of current all the nic requests
    */
   @Post('/')
-  @Header('content-type', 'application/json')
-  async createNicRequest(
-    @Body('user_id') user_id: number,
-    @Body('birthcert_no') birthcert_no: string,
-    @Body('birthcert_url') birthcert_url: string,
-  ): Promise<string> {
+  @Header('Content-Type', 'application/json')
+  async createNicRequest(@Body() body: NicRequestPostDto): Promise<string | null> {
     // Saving the request in the database
     const pid_type = 'NIC-Id';
     const req_date = new Date();
     const req_status = 'Pending';
 
-    const { request_id } = await this.nicRequestService.createNicRequest(
+    // Create the request entity
+    const request_id = await this.nicRequestService.createNicRequest(
       pid_type,
       req_date,
       req_status,
-      user_id,
-      birthcert_no,
-      birthcert_url,
+      body.user_id,
+      body.birthcert_no,
+      body.birthcert_url,
     );
 
-    return request_id.toString();
+    return JSON.stringify({ request_id: request_id });
   }
 }

@@ -16,4 +16,8 @@ export class AppUserService {
   async getAllAppUsers(): Promise<AppUser[]> {
     return this.appUserRepository.find();
   }
+
+  async find(user_id): Promise<AppUser | null> {
+    return this.appUserRepository.findOne({ where: { user_id: user_id } });
+  }
 }

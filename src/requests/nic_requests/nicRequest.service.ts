@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { NicRequest } from './nicRequest.entity';
 import { Repository } from 'typeorm';
 import { AppUser } from '../../users/appUser.entity';
+import { RequestService } from '../request.service';
 
 @Injectable()
 export class NicRequestService {
@@ -10,6 +11,7 @@ export class NicRequestService {
     @InjectRepository(NicRequest)
     private nicRequestRepository: Repository<NicRequest>,
     @InjectRepository(AppUser) private appUserRepository: Repository<AppUser>,
+    private readonly requestService: RequestService,
   ) {}
 
   async getAllNICRequests() {
@@ -24,27 +26,31 @@ export class NicRequestService {
     user_id: number,
     birthcert_no: string,
     birthcert_url: string,
-  ): Promise<{ request_id: number }> {
+  ): Promise<number | null> {
     // Fetching the app user from the db
     const appUser = await this.appUserRepository.findOne({
       where: { user_id: user_id },
     });
 
     if (!appUser) {
-      throw new NotFoundException("Appuser does't exists.");
+      throw new NotFoundException("Appuser doesn't exists.");
     }
 
+    // Create the request which inherits from the request
+    const request_id = await this.requestService.createRequest(pid_type, req_date, req_status, user_id);
+
+    const request = await this.requestService.find(request_id);
+
     const newNicRequest = await this.nicRequestRepository.create({
-      pid_type,
-      req_date,
-      req_status,
-      appUser,
+      request_id,
       birthcert_no,
       birthcert_url,
+      request,
     });
+
     // Saving the nicRequest in the database
     await this.nicRequestRepository.save(newNicRequest);
 
-    return { request_id: newNicRequest.request_id };
+    return newNicRequest.request.request_id;
   }
 }
