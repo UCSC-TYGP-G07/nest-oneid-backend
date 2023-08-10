@@ -22,7 +22,7 @@ export class NicRequestController {
   @Header('Content-Type', 'application/json')
   async getAllNicRequests(): Promise<string | null> {
     // Fetching the Nic Request
-    const allRequests = await this.nicRequestService.getAllNICRequests();
+    const allRequests = await this.nicRequestService.getAllNicRequests();
 
     const result = await Promise.all(
       allRequests.map(async (req) => {

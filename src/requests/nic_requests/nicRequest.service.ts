@@ -14,7 +14,7 @@ export class NicRequestService {
     private readonly requestService: RequestService,
   ) {}
 
-  async getAllNICRequests() {
+  async getAllNicRequests() {
     const nicRequests = this.nicRequestRepository.find();
     return nicRequests;
   }
