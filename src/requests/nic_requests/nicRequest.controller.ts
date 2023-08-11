@@ -43,7 +43,7 @@ export class NicRequestController {
   /*
    * Url - domain-name/request/nic [POST]
    * Purpose - saving a new nic request to the database
-   * Parameters - form body data[
+   * Parameters - form body data[user_id, birthcert_no, birthcert_url]
    * Return type - list of current all the nic requests
    */
   @Post('/')
