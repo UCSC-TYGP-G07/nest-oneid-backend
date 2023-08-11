@@ -7,6 +7,7 @@ import { NicRequestModule } from './requests/nic_requests/nicRequest.module';
 import { NicRequest } from './requests/nic_requests/nicRequest.entity';
 import { RequestModule } from './requests/request.module';
 import { Request } from './requests/request.entity';
+import { IcaoValidateModule } from './image-validations/icao-validation/icaoValidate.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { Request } from './requests/request.entity';
     AppUserModule,
     RequestModule,
     NicRequestModule,
+    IcaoValidateModule,
 
     // Adding the postgresql configurations
     TypeOrmModule.forRoot({
