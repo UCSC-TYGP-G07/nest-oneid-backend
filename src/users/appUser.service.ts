@@ -17,7 +17,7 @@ export class AppUserService {
     return this.appUserRepository.find();
   }
 
-  async find(user_id): Promise<AppUser | null> {
+  async find(user_id: number): Promise<AppUser | null> {
     return this.appUserRepository.findOne({ where: { user_id: user_id } });
   }
 }
