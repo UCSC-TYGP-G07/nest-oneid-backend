@@ -10,15 +10,19 @@ import { Request } from './requests/request.entity';
 import { IcaoValidateModule } from './image-validations/icao-validation/icaoValidate.module';
 import { AuthUserModule } from './users/authUser/authUser.module';
 import { AuthUser } from './users/authUser/authUser.entity';
+import { AuthModule } from './auth/auth.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
+    AuthModule,
     AppUserModule,
     RequestModule,
     NicRequestModule,
     IcaoValidateModule,
     AuthUserModule,
+    JwtModule,
 
     // Adding the postgresql configurations
     TypeOrmModule.forRoot({

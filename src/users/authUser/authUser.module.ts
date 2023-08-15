@@ -8,5 +8,6 @@ import { AuthUserController } from './authUser.controller';
   imports: [TypeOrmModule.forFeature([AuthUser])],
   providers: [AuthUserService],
   controllers: [AuthUserController],
+  exports: [AuthUserService],
 })
 export class AuthUserModule {}
