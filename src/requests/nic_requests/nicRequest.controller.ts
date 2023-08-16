@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Header, Post } from '@nestjs/common';
+import { Body, Controller, Get, Header, Post, UseGuards } from '@nestjs/common';
 import { NicRequestService } from './nicRequest.service';
 import { NicRequestPostDto } from './nicRequestPost.dto';
 import { RequestService } from '../request.service';
 import { AppUserService } from '../../users/appUser.service';
+import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('/request/nic')
 export class NicRequestController {
@@ -19,6 +20,7 @@ export class NicRequestController {
    * Return type - list of current all the nic requests
    */
   @Get('/')
+  @UseGuards(AuthGuard)
   @Header('Content-Type', 'application/json')
   async getAllNicRequests(): Promise<string | null> {
     // Fetching the Nic Request
@@ -47,6 +49,7 @@ export class NicRequestController {
    * Return type - list of current all the nic requests
    */
   @Post('/')
+  @UseGuards(AuthGuard)
   @Header('Content-Type', 'application/json')
   async createNicRequest(@Body() body: NicRequestPostDto): Promise<string | null> {
     // Saving the request in the database

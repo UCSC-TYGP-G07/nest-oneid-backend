@@ -1,6 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AppUser } from './appUser.entity';
 import { AppUserService } from './appUser.service';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('/users/app')
 export class AppUserController {
@@ -13,6 +14,7 @@ export class AppUserController {
    * Return type - list of current saved app users details
    */
   @Get('/')
+  @UseGuards(AuthGuard)
   async getAllAppUsers(): Promise<AppUser[]> {
     const appUsers = await this.appUserService.getAllAppUsers();
     return appUsers;
