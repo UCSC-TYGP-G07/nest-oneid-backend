@@ -1,5 +1,5 @@
 export class NicRequestPostDto {
-  user_id: number;
+  user_id: string;
   birthcert_no: string;
   birthcert_url: string;
 }

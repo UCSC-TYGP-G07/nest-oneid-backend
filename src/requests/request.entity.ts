@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { AppUser } from '../users/appUser.entity';
+import { AppUser } from '../users/appUser/appUser.entity';
 
 /*
  * Request modal which maps to request table

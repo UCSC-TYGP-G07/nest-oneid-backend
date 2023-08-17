@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NicRequest } from './nicRequest.entity';
 import { Repository } from 'typeorm';
-import { AppUser } from '../../users/appUser.entity';
+import { AppUser } from '../../users/appUser/appUser.entity';
 import { RequestService } from '../request.service';
 
 @Injectable()
@@ -23,18 +23,18 @@ export class NicRequestService {
     pid_type: string,
     req_date: Date,
     req_status: string,
-    user_id: number,
+    user_id: string,
     birthcert_no: string,
     birthcert_url: string,
   ): Promise<number | null> {
     // Fetching the app user from the db
-    const appUser = await this.appUserRepository.findOne({
-      where: { user_id: user_id },
-    });
+    // const appUser = await this.appUserRepository.findOne({
+    //   where: { authUser : user_id },
+    // });
 
-    if (!appUser) {
-      throw new NotFoundException("Appuser doesn't exists.");
-    }
+    // if (!appUser) {
+    //   throw new NotFoundException("Appuser doesn't exists.");
+    // }
 
     // Create the request which inherits from the request
     const request_id = await this.requestService.createRequest(pid_type, req_date, req_status, user_id);
