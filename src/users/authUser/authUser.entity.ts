@@ -1,31 +1,37 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
+export enum UserRole {
+  APP_USER = 'app-user',
+  GOV_OFFICER = 'gov-officer',
+  ORGANISATION = 'organisation',
+}
+
 @Entity('Auth_User')
 export class AuthUser {
-  @PrimaryGeneratedColumn('uuid')
-  user_id: string;
+  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+  userId: string;
 
-  @Column({ nullable: false, length: 36, unique: true })
+  @Column({ name: 'email', nullable: false, length: 36, unique: true })
   email: string;
 
-  @Column({ nullable: false, length: 64 })
+  @Column({ name: 'password', nullable: false, length: 64 })
   password: string;
 
-  @Column({ nullable: false, length: 36 })
-  role: string;
+  @Column({ name: 'role', type: 'enum', enum: UserRole, nullable: false })
+  role: UserRole;
 
-  @Column({ nullable: false })
-  created_date: Date;
+  @Column({ name: 'created_date', nullable: false })
+  createdDate: Date;
 
-  @Column()
-  last_login_date: Date;
+  @Column({ name: 'last_login_date', nullable: true })
+  lastLoginDate: Date;
 
-  @Column({ nullable: false })
-  password_expiry_date: Date;
+  @Column({ name: 'password_expiry_date', nullable: false })
+  passwordExpiryDate: Date;
 
-  @Column({ nullable: false })
-  is_locked: boolean;
+  @Column({ name: 'is_locked', nullable: false })
+  isLocked: boolean;
 
-  @Column()
-  last_login_ip: string;
+  @Column({ name: 'last_login_ip', nullable: true })
+  lastLoginIP: string;
 }

@@ -1,32 +1,67 @@
-import { Body, Controller, Header, HttpException, HttpStatus, Post, UnauthorizedException } from '@nestjs/common';
-import { AuthUserSignupDto } from '../users/authUser/authUser.signup.dto';
-import { AuthUserLoginDto } from '../users/authUser/authUser.login.dto';
+import { Body, Controller, Header, HttpCode, HttpException, HttpStatus, Post, Query } from '@nestjs/common';
+import { AuthUserLoginDTO } from '../users/authUser/authUserLoginDTO';
 import { AuthUserService } from '../users/authUser/authUser.service';
 import { JwtService } from '@nestjs/jwt';
+import { isPasswordValid, isValidEmail } from '../utils/validation.utils';
+import { AppUserRegisterDTO } from '../users/appUser/appUserRegisterDTO';
+import { UserRole } from '../users/authUser/authUser.entity';
+import { AppUserService } from '../users/appUser/appUser.service';
 
 @Controller('/auth')
 export class AuthController {
-  constructor(private readonly appUserService: AuthUserService, private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly authUserService: AuthUserService,
+    private readonly appUserService: AppUserService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   /*
-   * Url - domain-name/auth/signup[POST]
+   * Url - domain-name/auth/register [POST]
    * Purpose - registering new user to the system
    * Parameters - email, password, role, login_ip
    * Return type - newly created auth user
    */
-
-  @Post('/signup')
+  @Post('/register')
   @Header('Content-Type', 'application/json')
-  async signup(@Body() body: AuthUserSignupDto): Promise<string | null> {
-    const email = body.email;
-    const password = body.password; // Supposed password hashed(Using SHA-256)
-    const role = body.role;
-    const last_login_ip = body.last_login_ip;
+  async register(@Body() body: AppUserRegisterDTO, @Query('role') role: UserRole): Promise<string | null> {
+    if (!role) {
+      throw new HttpException('Role is required', HttpStatus.BAD_REQUEST);
+    }
 
-    /* Creating new auth user in database */
-    const newAuthUser = await this.appUserService.create(email, password, role, last_login_ip);
+    // check if role is valid
+    if (!Object.values(UserRole).includes(role)) {
+      throw new HttpException('Invalid role', HttpStatus.BAD_REQUEST);
+    }
 
-    return JSON.stringify(newAuthUser);
+    const { email, password } = body;
+
+    // Validate input
+    if (!email || !password) {
+      throw new HttpException('Email and password are required', HttpStatus.BAD_REQUEST);
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      throw new HttpException('Invalid email format', HttpStatus.BAD_REQUEST);
+    }
+
+    // Validate password length
+    if (!isPasswordValid(password)) {
+      throw new HttpException('Password must be at least 6 characters long', HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      // Create AuthUser
+      const newAuthUser = await this.authUserService.create(email, password, role);
+
+      // Create AppUser and associate it with AuthUser
+      const newAppUser = await this.appUserService.create(body, newAuthUser);
+
+      return JSON.stringify(newAppUser);
+    } catch (error) {
+      // Handle errors and rollback transaction if needed
+      throw new HttpException('Registration failed', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   /*
@@ -37,30 +72,58 @@ export class AuthController {
    */
   @Post('/login')
   @Header('Content-Type', 'application/json')
-  async login(@Body() body: AuthUserLoginDto): Promise<string | null> {
-    const email = body.email;
-    const password = body.password; // Supposed password in SHA-256
+  @HttpCode(200)
+  async login(@Body() body: AuthUserLoginDTO): Promise<string | null> {
+    const { email, password } = body;
 
-    const user = await this.appUserService.findOneByEmail(email);
+    // Validate input
+    if (!email || !password) {
+      throw new HttpException('Email and password are required', HttpStatus.BAD_REQUEST);
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      throw new HttpException('Invalid email format', HttpStatus.BAD_REQUEST);
+    }
+
+    // Validate password length
+    if (!isPasswordValid(password)) {
+      throw new HttpException('Password must be at least 6 characters long', HttpStatus.BAD_REQUEST);
+    }
+
+    // Authenticate user
+    const user = await this.authUserService.findOneByEmail(email);
 
     if (!user) {
       /* User not found for given email address */
       throw new HttpException(
         {
           status: HttpStatus.NOT_FOUND,
-          error: 'Entered user not exists! Please check email',
+          error: 'User not found for given email address',
         },
         HttpStatus.NOT_FOUND,
       );
     }
 
-    /* User exists, checking the password */
     if (user.password !== password) {
-      throw new UnauthorizedException();
+      /* Incorrect password */
+      throw new HttpException(
+        {
+          status: HttpStatus.UNAUTHORIZED,
+          error: 'Invalid credentials',
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
-    const payload = { sub: user.user_id, email: user.email };
+    try {
+      // Generate JWT token
+      const payload = { sub: user.userId, email: user.email }; // Customize payload as needed
+      const token = this.jwtService.sign(payload);
 
-    return JSON.stringify({ access_token: await this.jwtService.signAsync(payload) });
+      return JSON.stringify({ access_token: token });
+    } catch (error) {
+      throw new HttpException('Login failed', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

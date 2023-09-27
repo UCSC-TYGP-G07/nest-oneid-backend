@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Request } from './request.entity';
-import { AppUser } from '../users/appUser.entity';
+import { AppUser } from '../users/appUser/appUser.entity';
 
 @Injectable()
 export class RequestService {
@@ -20,10 +20,10 @@ export class RequestService {
     });
   }
 
-  async createRequest(pid_type: string, req_date: Date, req_status: string, user_id: number): Promise<number | null> {
+  async createRequest(pid_type: string, req_date: Date, req_status: string, user_id: string): Promise<number | null> {
     // Getting the user who creates the request
     const appUser = await this.appUserRepository.findOne({
-      where: { user_id: user_id },
+      where: { userId: user_id },
     });
 
     const newRequest = await this.requestRepository.create({

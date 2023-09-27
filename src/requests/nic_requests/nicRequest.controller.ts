@@ -2,7 +2,7 @@ import { Body, Controller, Get, Header, Post, UseGuards } from '@nestjs/common';
 import { NicRequestService } from './nicRequest.service';
 import { NicRequestPostDto } from './nicRequestPost.dto';
 import { RequestService } from '../request.service';
-import { AppUserService } from '../../users/appUser.service';
+import { AppUserService } from '../../users/appUser/appUser.service';
 import { AuthGuard } from '../../auth/auth.guard';
 
 @Controller('/request/nic')
@@ -32,7 +32,7 @@ export class NicRequestController {
         const request = await this.requestService.find(req.request_id);
 
         // Getting the user who created this request
-        const appUser = await this.appUserService.find(request.appUser.user_id);
+        const appUser = await this.appUserService.find(request.appUser.authUser.userId);
 
         return { ...req, ...request, ...appUser };
       }),
@@ -45,7 +45,7 @@ export class NicRequestController {
   /*
    * Url - domain-name/request/nic [POST]
    * Purpose - saving a new nic request to the database
-   * Parameters - form body data[user_id, birthcert_no, birthcert_url]
+   * Parameters - form body data[userId, birthcert_no, birthcert_url]
    * Return type - list of current all the nic requests
    */
   @Post('/')

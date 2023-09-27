@@ -19,7 +19,7 @@ export class IcaoValidateController {
   /*
    * Url - domain-name/validations/icao-image
    * Purpose - check that submitted image is following ICAO guidelines(Image will be submitted in form data with field name imageFile
-   * TODO: Image should be linked with other properties like user_id, submitted_date, etc.
+   * TODO: Image should be linked with other properties like userId, submitted_date, etc.
    * Parameters - image
    * Return - percentage value(image is compliance with ICAO standards)
    */
