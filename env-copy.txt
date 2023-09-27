@@ -1,0 +1,7 @@
+DATABASE_TYPE=postgres
+DATABASE_HOST=oneid-db-new.csd7khdle26w.ap-southeast-1.rds.amazonaws.com
+DATABASE_PORT=5432
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=7u4Z83m2Og3f7V1ezwEo
+DATABASE_NAME=oneid-db-new
+JWT_SECRETE=1mfbDEIhJvs8fLev4SlBHsJZG2alN2DfBOSr9prbsjodkmePIrEpU4kkzTzh2NOC
