@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 import { AppUser } from './appUser.entity';
 import { AuthUser } from '../authUser/authUser.entity';
 import { AppUserCreateDTO } from './appUserCreateDTO';
@@ -30,6 +30,14 @@ export class AppUserService {
   }
 
   async find(user_id: string): Promise<AppUser | null> {
-    return this.appUserRepository.findOne({ where: { userId: user_id } });
+    return this.appUserRepository.findOneBy({ userId: user_id });
+  }
+
+  async update(appUser: AppUser): Promise<UpdateResult> {
+    return this.appUserRepository.update({ userId: appUser.userId }, appUser);
+  }
+
+  async delete(userId: string): Promise<DeleteResult> {
+    return this.appUserRepository.delete({ userId: userId });
   }
 }
