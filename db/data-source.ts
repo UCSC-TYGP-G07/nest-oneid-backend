@@ -1,5 +1,5 @@
-import { DataSource, DataSourceOptions } from "typeorm";
-import * as dotenv from "dotenv";
+import { DataSource, DataSourceOptions } from 'typeorm';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
 export const dataSourceOptions: DataSourceOptions = {
@@ -9,7 +9,6 @@ export const dataSourceOptions: DataSourceOptions = {
   username: process.env.DATABASE_USERNAME,
   password: process.env.DATABASE_PASSWORD,
   database: process.env.DATABASE_NAME,
-  ssl: { rejectUnauthorized: false },
   entities: ['dist/**/*.entity.js', 'dist/**/**/*.entity.js'],
   logging: true,
   migrationsRun: true,
