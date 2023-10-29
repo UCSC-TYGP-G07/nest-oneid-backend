@@ -1,13 +1,14 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { NicRequest } from './nicRequest.entity';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { AppUser } from '../../users/appUser/appUser.entity';
 import { RequestService } from '../request.service';
 
 @Injectable()
 export class NicRequestService {
   constructor(
+    @InjectEntityManager() private readonly entityManager: EntityManager,
     @InjectRepository(NicRequest)
     private nicRequestRepository: Repository<NicRequest>,
     @InjectRepository(AppUser) private appUserRepository: Repository<AppUser>,
@@ -19,6 +20,14 @@ export class NicRequestService {
     return nicRequests;
   }
 
+  async getNICRequest(request_id: string) {
+    return this.nicRequestRepository.findOneBy({ request_id: request_id });
+  }
+
+  async getNICRequestByUserId(user_id: string) {
+    return this.requestService.getRequestByUserId(user_id);
+  }
+
   async createNicRequest(
     pid_type: string,
     req_date: Date,
@@ -26,16 +35,7 @@ export class NicRequestService {
     user_id: string,
     birthcert_no: string,
     birthcert_url: string,
-  ): Promise<number | null> {
-    // Fetching the app user from the db
-    // const appUser = await this.appUserRepository.findOne({
-    //   where: { authUser : user_id },
-    // });
-
-    // if (!appUser) {
-    //   throw new NotFoundException("Appuser doesn't exists.");
-    // }
-
+  ): Promise<string | null> {
     // Create the request which inherits from the request
     const request_id = await this.requestService.createRequest(pid_type, req_date, req_status, user_id);
 
@@ -52,5 +52,25 @@ export class NicRequestService {
     await this.nicRequestRepository.save(newNicRequest);
 
     return newNicRequest.request.request_id;
+  }
+
+  async updateNICReqStatus(newNICRequest: NicRequest, status: string) {
+    const fetchtedRequest = await this.requestService.find(newNICRequest.request_id);
+
+    if (!fetchtedRequest) {
+      throw new NotFoundException(null, 'Request not found in database');
+    }
+
+    fetchtedRequest.req_status = status;
+
+    return this.requestService.updateRequest(newNICRequest.request_id, fetchtedRequest);
+  }
+
+  async deleteNICRequest(request_id: string) {
+    // Deleting nic request using entity
+    const requestId = await this.nicRequestRepository.delete({ request_id: request_id });
+    const reqRequestId = await this.requestService.deleteRequest(request_id);
+
+    return requestId;
   }
 }

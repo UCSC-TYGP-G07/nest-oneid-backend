@@ -8,7 +8,7 @@ import { Request } from '../request.entity';
 @Entity('NIC_Request')
 export class NicRequest {
   @PrimaryColumn()
-  request_id: number;
+  request_id: string;
 
   @OneToOne(() => Request, { cascade: true })
   @JoinColumn({ name: 'request_id' })

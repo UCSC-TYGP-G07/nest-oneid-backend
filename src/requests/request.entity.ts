@@ -8,8 +8,8 @@ import { AppUser } from '../users/appUser/appUser.entity';
 
 @Entity('PID_Request')
 export abstract class Request {
-  @PrimaryGeneratedColumn()
-  request_id: number;
+  @PrimaryGeneratedColumn('uuid', { name: 'user_id' })
+  request_id: string;
 
   @Column({ nullable: false })
   pid_type: string;
