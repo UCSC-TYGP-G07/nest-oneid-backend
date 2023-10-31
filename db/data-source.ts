@@ -14,6 +14,10 @@ export const dataSourceOptions: DataSourceOptions = {
   migrationsRun: true,
   synchronize: true,
   migrations: ['dist/db/migrations/*.js'],
+  ssl: {
+    rejectUnauthorized: false,
+  },
+  // ssl: true,
 };
 
 const dataSource = new DataSource(dataSourceOptions);

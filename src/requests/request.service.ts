@@ -35,7 +35,7 @@ export class RequestService {
     // Generating new request id
     const request_id: string = uuidv4();
 
-    const newRequest = await this.requestRepository.create({
+    const newRequest = this.requestRepository.create({
       request_id,
       pid_type,
       req_date,

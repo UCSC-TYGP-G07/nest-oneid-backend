@@ -16,8 +16,7 @@ export class NicRequestService {
   ) {}
 
   async getAllNicRequests() {
-    const nicRequests = this.nicRequestRepository.find();
-    return nicRequests;
+    return this.nicRequestRepository.find();
   }
 
   async getNICRequest(request_id: string) {
@@ -41,7 +40,7 @@ export class NicRequestService {
 
     const request = await this.requestService.find(request_id);
 
-    const newNicRequest = await this.nicRequestRepository.create({
+    const newNicRequest = this.nicRequestRepository.create({
       request_id,
       birthcert_no,
       birthcert_url,
@@ -55,22 +54,21 @@ export class NicRequestService {
   }
 
   async updateNICReqStatus(newNICRequest: NicRequest, status: string) {
-    const fetchtedRequest = await this.requestService.find(newNICRequest.request_id);
+    const fetchedRequest = await this.requestService.find(newNICRequest.request_id);
 
-    if (!fetchtedRequest) {
+    if (!fetchedRequest) {
       throw new NotFoundException(null, 'Request not found in database');
     }
 
-    fetchtedRequest.req_status = status;
+    fetchedRequest.req_status = status;
 
-    return this.requestService.updateRequest(newNICRequest.request_id, fetchtedRequest);
+    return this.requestService.updateRequest(newNICRequest.request_id, fetchedRequest);
   }
 
   async deleteNICRequest(request_id: string) {
     // Deleting nic request using entity
     const requestId = await this.nicRequestRepository.delete({ request_id: request_id });
-    const reqRequestId = await this.requestService.deleteRequest(request_id);
-
+    await this.requestService.deleteRequest(request_id);
     return requestId;
   }
 }

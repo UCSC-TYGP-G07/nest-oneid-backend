@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { IcaoValidateController } from './icaoValidate.controller';
+import { IcaoValidationController } from './icaoValidation.controller';
 import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [HttpModule.register({ timeout: 5000, maxRedirects: 5 })],
-  controllers: [IcaoValidateController],
+  controllers: [IcaoValidationController],
   providers: [],
 })
-export class IcaoValidateModule {}
+export class IcaoValidationModule {}

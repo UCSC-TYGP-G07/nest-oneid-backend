@@ -14,7 +14,7 @@ import { AppUserService } from '../users/appUser/appUser.service';
     ConfigModule.forRoot(),
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRETE,
+      secret: process.env.JWT_SECRET,
     }),
     AuthUserModule,
   ],

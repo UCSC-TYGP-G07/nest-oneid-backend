@@ -21,10 +21,10 @@ export class AppUserController {
   constructor(private readonly appUserService: AppUserService, private readonly authUserService: AuthUserService) {}
 
   /*
-   * Url - domain-name/users[GET]
+   * Url - domain-name/api/users/app [GET]
    * Purpose - fetching all the app users from the database
    * Parameters - none
-   * Return type - list of current saved app users details
+   * Return type - list of app users
    */
   @Get('/')
   @UseGuards(AuthGuard)
@@ -66,7 +66,7 @@ export class AppUserController {
    * Url - domain-name/api/users/app/{id} [PATCH]
    * Purpose - update the details of appUser
    * Parameters - userId, updated details(appUser)
-   * Return type - userId(updated)
+   * Return type - appUser(updated)
    */
   @Patch(':id')
   @UseGuards(AuthGuard)
@@ -102,8 +102,7 @@ export class AppUserController {
     // Updating the existing appUser
     try {
       const updatedAppUser = await this.appUserService.update(appUser);
-
-      return JSON.stringify(appUser.userId);
+      return JSON.stringify(updatedAppUser);
     } catch (error) {
       throw new HttpException('Internal server error!', HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -113,7 +112,7 @@ export class AppUserController {
    * Url - domain-name/api/users/app/{id} [DELETE]
    * Purpose - delete an existing appUser
    * Parameters - userId
-   * Return type - appUser(deleted)
+   * Return type - userId of appUser(deleted)
    */
   @Delete(':id')
   @UseGuards(AuthGuard)

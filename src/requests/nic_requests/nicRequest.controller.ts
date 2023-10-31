@@ -25,7 +25,7 @@ import { AuthGuard } from '../../auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 
-@Controller('/request/nic')
+@Controller('/requests/nic')
 export class NicRequestController {
   constructor(
     private readonly requestService: RequestService,
@@ -34,7 +34,7 @@ export class NicRequestController {
   ) {}
 
   /*
-   * Url - domain-name/request/nic [GET]
+   * Url - domain-name/api/requests/nic [GET]
    * Purpose - fetching all the nic requests from the database
    * Parameters - none
    * Return type - list of current all the nic requests
@@ -63,7 +63,7 @@ export class NicRequestController {
   }
 
   /*
-   * Url - domain-name/request/nic [POST]
+   * Url - domain-name/api/requests/nic [POST]
    * Purpose - saving a new nic request to the database
    * Parameters - form body data[userId, birthcert_no]
    * Return type - list of current all the nic requests
@@ -71,7 +71,7 @@ export class NicRequestController {
   @Post('/')
   @UseGuards(AuthGuard)
   @UseInterceptors(
-    FileInterceptor('birthcertfile', {
+    FileInterceptor('birth-cert-file', {
       storage: diskStorage({
         destination: (req, res, cb) => cb(null, './uploads'),
         filename: (req, file, cb) => {
@@ -94,16 +94,16 @@ export class NicRequestController {
         ],
       }),
     )
-    birthcertfile: Express.Multer.File,
+    birthCertFile: Express.Multer.File,
   ): Promise<string | null> {
     // Saving the request in the database
     const pid_type = 'NIC-Id';
     const req_date = new Date();
     const req_status = 'Pending';
 
-    const birthcert_url = birthcertfile.filename;
+    const birthcert_url = birthCertFile.filename;
 
-    // Check whether nic Request is exists for this user id
+    // Check whether nic Request exists for this user id
     const request = await this.nicRequestService.getNICRequestByUserId(body.user_id);
 
     if (request) {
@@ -125,7 +125,7 @@ export class NicRequestController {
   }
 
   /*
-   * Url - domain-name/request/nic/request_id?status=(new-status) [PATCH]
+   * Url - domain-name/api/requests/nic/request_id?status=(new-status) [PATCH]
    * Purpose - update the status of the nic request
    * Parameters - form body data[userId, birthcert_no, birthcert_url]
    * Return type - request id
@@ -138,15 +138,15 @@ export class NicRequestController {
     const UUID_RegEx = /[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/;
 
     if (!request_id || !UUID_RegEx.test(request_id)) {
-      // Request id is undefined or not proper format
+      // Request id is undefined or not in proper format
       throw new HttpException('Invalid request id', HttpStatus.BAD_REQUEST);
     }
 
     // Fetching the request associated with that id
-    let request = await this.nicRequestService.getNICRequest(request_id);
+    const request = await this.nicRequestService.getNICRequest(request_id);
 
     if (!request) {
-      // Request doesn't exsits associated with that id
+      // NIC request associated with that id doesn't exist
       throw new HttpException('Request not found', HttpStatus.NOT_FOUND);
     }
 
@@ -165,7 +165,7 @@ export class NicRequestController {
   }
 
   /*
-   * Url - domain-name/request/nic/request_id [DELETE]
+   * Url - domain-name/api/requests/nic/request_id [DELETE]
    * Purpose - delete a nic request from the database
    * Parameters - from url request_id
    * Return type - deleted request id
@@ -183,7 +183,7 @@ export class NicRequestController {
     }
 
     // Fetching the request associated with that id
-    let request = await this.nicRequestService.getNICRequest(request_id);
+    const request = await this.nicRequestService.getNICRequest(request_id);
 
     if (!request) {
       // Request doesn't exsits associated with that id
@@ -192,6 +192,6 @@ export class NicRequestController {
 
     const requestId = await this.nicRequestService.deleteNICRequest(request_id);
 
-    return JSON.stringify({ request_id: request_id });
+    return JSON.stringify({ request_id: requestId });
   }
 }

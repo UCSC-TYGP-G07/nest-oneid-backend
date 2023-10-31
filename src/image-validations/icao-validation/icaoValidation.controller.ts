@@ -12,16 +12,16 @@ import * as FormData from 'form-data';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, map } from 'rxjs';
 
-@Controller('/validations/icao-image')
-export class IcaoValidateController {
+@Controller('/validations/validate-icao')
+export class IcaoValidationController {
   constructor(private readonly httpService: HttpService) {}
 
   /*
-   * Url - domain-name/validations/icao-image
-   * Purpose - check that submitted image is following ICAO guidelines(Image will be submitted in form data with field name imageFile
+   * Url - domain-name/api/validations/validate-icao
+   * Purpose - check that submitted face photo complies with ICAO guidelines (Image will be submitted in form data with field name: imageFile)
    * TODO: Image should be linked with other properties like userId, submitted_date, etc.
    * Parameters - image
-   * Return - percentage value(image is compliance with ICAO standards)
+   * Return - ICAO compliance check results
    */
   @Post('/')
   @UseInterceptors(FileInterceptor('imageFile'))
@@ -29,7 +29,10 @@ export class IcaoValidateController {
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 5000000, message: 'Validation failed (expected size is less than 5MB)' }),
+          new MaxFileSizeValidator({
+            maxSize: 5 * 1024 * 1024,
+            message: 'Validation failed (expected size is less than 5MB)',
+          }),
           new FileTypeValidator({ fileType: /(jpg|jpeg|png|JPG|JPEG|PNG)$/ }),
         ],
       }),
@@ -37,10 +40,10 @@ export class IcaoValidateController {
     imageFile: Express.Multer.File,
   ): Promise<string | null> {
     /*
-     * Sending the file to the fastapi backend
-     * Url - http://127.0.0.1:8000/validation/icao-images(hard coded)
+     * Sending the file to the FastAPI backend
+     * Url - ICAO_VALIDATION_URL in env
      */
-    const icaoUrl = 'http://127.0.0.1:8000/validation/icao-images';
+    const icaoUrl = process.env.ICAO_VALIDATION_URL;
     const formData = new FormData();
     formData.append('imageFile', JSON.stringify(imageFile), imageFile.originalname);
 
@@ -54,6 +57,6 @@ export class IcaoValidateController {
 
     console.log(response);
 
-    return 'Image uploaded successfully!';
+    return 'Request submitted successfully!';
   }
 }

@@ -16,7 +16,7 @@ export class AuthController {
   ) {}
 
   /*
-   * Url - domain-name/auth/register [POST]
+   * Url - domain-name/api/auth/register [POST]
    * Purpose - registering new user to the system
    * Parameters - email, password, role, login_ip
    * Return type - newly created auth user
@@ -65,7 +65,7 @@ export class AuthController {
   }
 
   /*
-   * Url - domain-name/auth/login[POST]
+   * Url - domain-name/api/auth/login[POST]
    * Purpose - login to the system using email and password
    * Parameters - email and password
    * Return type - JWT Token
