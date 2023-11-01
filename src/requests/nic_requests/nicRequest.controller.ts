@@ -50,9 +50,10 @@ export class NicRequestController {
       allRequests.map(async (req) => {
         // Getting the request entity
         const request = await this.requestService.find(req.request_id);
+        console.log(request);
 
         // Getting the user who created this request
-        const appUser = await this.appUserService.find(request.appUser.authUser.userId);
+        const appUser = await this.appUserService.find(request.appUser.userId);
 
         return { ...req, ...request, ...appUser };
       }),
