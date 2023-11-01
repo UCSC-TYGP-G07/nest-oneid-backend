@@ -9,6 +9,8 @@ import { AuthUserModule } from './users/authUser/authUser.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { dataSourceOptions } from '../db/data-source';
+import { AppointmentModule } from './appointments/appointment.module';
+import { MailModule } from './appointments/mail.module';
 import { APP_FILTER } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
@@ -25,6 +27,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     IcaoValidationModule,
     AuthUserModule,
     JwtModule,
+    AppointmentModule,
+    MailModule,
 
     // Adding the DB configurations
     TypeOrmModule.forRoot(dataSourceOptions),
