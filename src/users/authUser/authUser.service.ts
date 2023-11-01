@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthUser, UserRole } from './authUser.entity';
 import { Repository } from 'typeorm';
 import { v4 as uuid } from 'uuid';
+import { hashPassword } from '../../utils/hashing.utils';
 
 @Injectable()
 export class AuthUserService {
@@ -32,10 +33,12 @@ export class AuthUserService {
     const isLocked = false;
     const lastLoginIP = null;
 
+    const hashedPassword = await hashPassword(password);
+
     const newAuthUser = this.authUserRepository.create({
       userId: userId,
       email,
-      password,
+      password: hashedPassword,
       role,
       createdDate,
       lastLoginDate,

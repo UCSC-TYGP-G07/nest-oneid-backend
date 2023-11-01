@@ -9,6 +9,8 @@ import { AuthUserModule } from './users/authUser/authUser.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import { dataSourceOptions } from '../db/data-source';
+import { APP_FILTER } from '@nestjs/core';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 @Module({
   imports: [
@@ -26,6 +28,12 @@ import { dataSourceOptions } from '../db/data-source';
 
     // Adding the DB configurations
     TypeOrmModule.forRoot(dataSourceOptions),
+  ],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
   ],
 })
 export class AppModule {}

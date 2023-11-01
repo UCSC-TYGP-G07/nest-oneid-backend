@@ -51,6 +51,14 @@ export class AuthController {
     }
 
     try {
+      // Check if an AuthUser with the given email already exists
+      const existingAuthUser = await this.authUserService.findOneByEmail(email);
+
+      if (existingAuthUser) {
+        // User with the same email already exists, return an error
+        throw new HttpException('User with this email already exists', HttpStatus.CONFLICT);
+      }
+
       // Create AuthUser
       const newAuthUser = await this.authUserService.create(email, password, role);
 
@@ -59,8 +67,9 @@ export class AuthController {
 
       return JSON.stringify(newAppUser);
     } catch (error) {
+      console.log(error);
       // Handle errors and rollback transaction if needed
-      throw new HttpException('Registration failed', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
