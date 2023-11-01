@@ -1,4 +1,4 @@
-import { Body, Controller, Header, HttpCode, HttpException, HttpStatus, Post, Query } from '@nestjs/common';
+import { Body, Controller, Header, HttpCode, HttpException, HttpStatus, Post, Query, Req } from '@nestjs/common';
 import { AuthUserLoginDTO } from '../users/authUser/authUserLoginDTO';
 import { AuthUserService } from '../users/authUser/authUser.service';
 import { JwtService } from '@nestjs/jwt';
@@ -6,6 +6,8 @@ import { isPasswordValid, isValidEmail } from '../utils/validation.utils';
 import { AppUserRegisterDTO } from '../users/appUser/appUserRegisterDTO';
 import { UserRole } from '../users/authUser/authUser.entity';
 import { AppUserService } from '../users/appUser/appUser.service';
+import { comparePasswords } from '../utils/hashing.utils';
+import { Request } from 'express';
 
 @Controller('/auth')
 export class AuthController {
@@ -82,7 +84,7 @@ export class AuthController {
   @Post('/login')
   @Header('Content-Type', 'application/json')
   @HttpCode(200)
-  async login(@Body() body: AuthUserLoginDTO): Promise<string | null> {
+  async login(@Body() body: AuthUserLoginDTO, @Req() request: Request): Promise<string | null> {
     const { email, password } = body;
 
     // Validate input
@@ -101,7 +103,7 @@ export class AuthController {
     }
 
     // Authenticate user
-    const user = await this.authUserService.findOneByEmail(email);
+    let user = await this.authUserService.findOneByEmail(email);
 
     if (!user) {
       /* User not found for given email address */
@@ -114,8 +116,27 @@ export class AuthController {
       );
     }
 
-    if (user.password !== password) {
-      /* Incorrect password */
+    if (await comparePasswords(password, user.password)) {
+      try {
+        let ip = request.headers['x-forwarded-for'] || request.socket.remoteAddress;
+        if (Array.isArray(ip)) {
+          ip = ip[0];
+        }
+        await this.authUserService.updateLastLogin(user.userId, ip, new Date());
+
+        // Generate JWT token
+        const payload = { sub: user.userId, email: user.email }; // Customize payload as needed
+        const token = this.jwtService.sign(payload);
+
+        const appUser = await this.appUserService.find(user.userId);
+        user = { ...user, ...appUser };
+
+        delete user.password;
+        return JSON.stringify({ access_token: token, user: user });
+      } catch (error) {
+        throw new HttpException('Login failed', HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    } else {
       throw new HttpException(
         {
           status: HttpStatus.UNAUTHORIZED,
@@ -123,16 +144,6 @@ export class AuthController {
         },
         HttpStatus.UNAUTHORIZED,
       );
-    }
-
-    try {
-      // Generate JWT token
-      const payload = { sub: user.userId, email: user.email }; // Customize payload as needed
-      const token = this.jwtService.sign(payload);
-
-      return JSON.stringify({ access_token: token });
-    } catch (error) {
-      throw new HttpException('Login failed', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }

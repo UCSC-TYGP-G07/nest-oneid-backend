@@ -33,11 +33,11 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
     // Adding the DB configurations
     TypeOrmModule.forRoot(dataSourceOptions),
   ],
-  providers: [
-    {
-      provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
-    },
-  ],
+  // providers: [
+  //   {
+  //     provide: APP_FILTER,
+  //     useClass: HttpExceptionFilter,
+  //   },
+  // ],
 })
 export class AppModule {}

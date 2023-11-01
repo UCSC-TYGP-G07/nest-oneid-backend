@@ -50,6 +50,13 @@ export class AuthUserService {
     return this.authUserRepository.save(newAuthUser);
   }
 
+  async updateLastLogin(userId: string, lastLoginIP: string, lastLoginDate: Date): Promise<AuthUser | null> {
+    const authUser = await this.authUserRepository.findOne({ where: { userId: userId } });
+    authUser.lastLoginIP = lastLoginIP;
+    authUser.lastLoginDate = lastLoginDate;
+    return this.authUserRepository.save(authUser);
+  }
+
   //
   // /* Updating existing authUser */
   // async update(
